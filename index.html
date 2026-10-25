@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Glowing Light Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle, #0b0f19, #020408);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .calc-container {
+            width: 100%;
+            max-width: 380px;
+            background: #111827;
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.1);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 5px;
+        }
+
+        .display-screen {
+            background: #030712;
+            padding: 22px;
+            text-align: right;
+            word-break: break-all;
+            min-height: 130px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-radius: 20px 20px 10px 10px;
+            margin: 10px;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.8);
+        }
+
+        .expression-text {
+            color: #64748b;
+            font-size: 15px;
+            min-height: 22px;
+        }
+
+        .live-result {
+            color: #38bdf8;
+            font-size: 38px;
+            font-weight: bold;
+            margin-top: 5px;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            padding: 20px;
+        }
+
+        button {
+            background: linear-gradient(145deg, #253042, #18202d);
+            color: #f3f4f6;
+            border: none;
+            padding: 18px 0;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5), 
+                        inset 0 1px 1px rgba(255, 255, 255, 0.15);
+            position: relative;
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 
+                        inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-ac { box-shadow: 0 6px 12px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), 0 8px 20px rgba(239, 68, 68, 0.4); color: #fca5a5; }
+        .btn-del { box-shadow: 0 6px 12px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), 0 8px 20px rgba(249, 115, 22, 0.4); color: #fdba74; }
+        .btn-perc { box-shadow: 0 6px 12px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), 0 8px 20px rgba(234, 179, 8, 0.4); color: #fde047; }
+        .btn-div { box-shadow: 0 6px 12px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), 0 8px 20px rgba(59, 130, 246, 0.4); color: #93c5fd; }
+        .btn-mul { box-shadow: 0 6px 12px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), 0 8px 20px rgba(168, 85, 247, 0.4); color: #d8b4fe; }
+        .btn-min { box-shadow: 0 6px 12px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), 0 8px 20px rgba(236, 72, 153, 0.4); color: #f472b6; }
+        .btn-plus { box-shadow: 0 6px 12px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), 0 8px 20px rgba(6, 182, 212, 0.4); color: #67e8f9; }
+        
+        .btn-equal { 
+            background: linear-gradient(145deg, #059669, #047857);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.25), 0 10px 25px rgba(16, 185, 129, 0.7); 
+            color: #ffffff; 
+        }
+
+        .btn-num {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), 0 6px 15px rgba(255, 255, 255, 0.08);
+        }
+
+        .history-section {
+            background: #030712;
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            max-height: 150px;
+            overflow-y: auto;
+            border-radius: 10px 10px 20px 20px;
+            margin: 0 10px 10px 10px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .history-header h3 {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .clear-history-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(220, 38, 38, 0.4);
+        }
+
+        .history-list {
+            list-style: none;
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+
+        .history-item {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .history-item span {
+            color: #38bdf8;
+        }
+
+        .no-history {
+            color: #4b5563;
+            font-size: 12px;
+            text-align: center;
+            font-style: italic;
+            padding: 6px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="calc-container">
+        <!-- स्क्रीन -->
+        <div class="display-screen">
+            <div id="expressionText" class="expression-text">0</div>
+            <div id="liveResult" class="live-result">0</div>
+        </div>
+
+        <!-- 3D उभरे हुए और रंग-बिरंगी लाइट वाले बटन्स -->
+        <div class="buttons-grid">
+            <button class="btn-ac" onclick="clearAll()">AC</button>
+            <button class="btn-del" onclick="deleteDigit()">⌫</button>
+            <button class="btn-perc" onclick="appendInput('%')">%</button>
+            <button class="btn-div" onclick="appendInput('/')">÷</button>
+
+            <button class="btn-num" onclick="appendInput('7')">7</button>
+            <button class="btn-num" onclick="appendInput('8')">8</button>
+            <button class="btn-num" onclick="appendInput('9')">9</button>
+            <button class="btn-mul" onclick="appendInput('*')">×</button>
+
+            <button class="btn-num" onclick="appendInput('4')">4</button>
+            <button class="btn-num" onclick="appendInput('5')">5</button>
+            <button class="btn-num" onclick="appendInput('6')">6</button>
+            <button class="btn-min" onclick="appendInput('-')">-</button>
+
+            <button class="btn-num" onclick="appendInput('1')">1</button>
+            <button class="btn-num" onclick="appendInput('2')">2</button>
+            <button class="btn-num" onclick="appendInput('3')">3</button>
+            <button class="btn-plus" onclick="appendInput('+')">+</button>
+
+            <button class="btn-num" onclick="appendInput('00')">00</button>
+            <button class="btn-num" onclick="appendInput('0')">0</button>
+            <button class="btn-num" onclick="appendInput('.')">.</button>
+            <button class="btn-equal" onclick="finalSubmit()">=</button>
+        </div>
+
+        <!-- हिस्ट्री सेक्शन -->
+        <div class="history-section">
+            <div class="history-header">
+                <h3>📜 कैलकुलेशन हिस्ट्री</h3>
+                <button class="clear-history-btn" onclick="clearHistory()">सभी डिलीट</button>
+            </div>
+            <div id="historyList" class="history-list">
+                <div class="no-history">कोई हिस्ट्री नहीं है</div>
+            </div>
+        </div>
+    </div>
+        <script>
+        let inputString = '';
+        let history = [];
+
+        const expressionText = document.getElementById('expressionText');
+        const liveResult = document.getElementById('liveResult');
+        const historyList = document.getElementById('historyList');
+
+        function updateDisplay() {
+            expressionText.innerText = inputString === '' ? '0' : inputString;
+            
+            if (inputString === '') {
+                liveResult.innerText = '0';
+                return;
+            }
+
+            try {
+                let cleanString = inputString;
+                let lastChar = cleanString.slice(-1);
+                if (['+', '-', '*', '/', '%', '.'].includes(lastChar)) {
+                    cleanString = cleanString.slice(0, -1);
+                }
+
+                if (cleanString !== '') {
+                    let evalResult = Function('return ' + cleanString.replace(/×/g, '*').replace(/÷/g, '/'))();
+                    liveResult.innerText = isNaN(evalResult) ? '' : evalResult;
+                }
+            } catch (e) {
+                liveResult.innerText = '';
+            }
+        }
+
+        function appendInput(val) {
+            if (inputString === '0' && val !== '.') {
+                inputString = val;
+            } else {
+                inputString += val;
+            }
+            updateDisplay();
+        }
+
+        function deleteDigit() {
+            inputString = inputString.slice(0, -1);
+            updateDisplay();
+        }
+
+        function clearAll() {
+            inputString = '';
+            updateDisplay();
+        }
+
+        function finalSubmit() {
+            if (inputString === '') return;
+            try {
+                let finalVal = Function('return ' + inputString.replace(/×/g, '*').replace(/÷/g, '/'))();
+                if (!isNaN(finalVal)) {
+                    addToHistory(inputString + ' =', finalVal);
+                    inputString = finalVal.toString();
+                    updateDisplay();
+                }
+            } catch (e) {
+                liveResult.innerText = 'Error';
+            }
+        }
+
+        function addToHistory(expr, res) {
+            history.unshift({ expr, res });
+            renderHistory();
+        }
+
+        function renderHistory() {
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="no-history">कोई हिस्ट्री नहीं है</div>';
+                return;
+            }
+
+            let html = '';
+            history.forEach((item, index) => {
+                html += `
+                    <div class="history-item">
+                        <span>${item.expr} <strong>${item.res}</strong></span>
+                        <button onclick="deleteHistoryItem(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:12px;">❌</button>
+                    </div>
+                `;
+            });
+            historyList.innerHTML = html;
+        }
+
+        function clearHistory() {
+            history = [];
+            renderHistory();
+        }
+
+        function deleteHistoryItem(index) {
+            history.splice(index, 1);
+            renderHistory();
+        }
+    </script>
+</body>
+</html>
